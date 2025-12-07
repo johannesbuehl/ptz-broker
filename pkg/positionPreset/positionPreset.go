@@ -3,6 +3,7 @@ package positionpreset
 import (
 	"bufio"
 	"net"
+	"strings"
 	"sync"
 )
 
@@ -10,6 +11,16 @@ type Position struct {
 	Pan  string `json:"pan"`
 	Tilt string `json:"tilt"`
 	Zoom string `json:"zoom"`
+}
+
+func (p Position) Recall(connection *net.TCPConn) error {
+	command := "81 01 06 02 18 14 " + strings.Join([]string{p.Pan, p.Tilt}, " ") + " FF"
+
+	if _, err := connection.Write([]byte(command)); err != nil {
+		return err
+	} else {
+		return nil
+	}
 }
 
 func GetCameraPosition(connection *net.TCPConn) (Position, error) {

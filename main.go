@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net"
 
 	positionpreset "github.com/johannesbuehl/ptz-broker/pkg/positionPreset"
@@ -24,6 +25,11 @@ func main() {
 	} else {
 		defer connection.Close()
 		connection.SetKeepAlive(true)
-		positionpreset.GetCameraPosition(connection)
+		if Position, err := positionpreset.GetCameraPosition(connection); err != nil {
+			fmt.Println(err)
+		} else {
+			configFile := config{}
+			configFile.Presets.Positions["Altar"] = Position
+		}
 	}
 }
