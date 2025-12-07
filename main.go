@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net"
 
 	positionpreset "github.com/johannesbuehl/ptz-broker/pkg/positionPreset"
@@ -16,7 +15,6 @@ type config struct {
 }
 
 func main() {
-	fmt.Println("Hello World")
 
 	if tcpAddress, err := net.ResolveTCPAddr("tcp", "tcpbin.com:4242"); err != nil {
 		panic(err)
