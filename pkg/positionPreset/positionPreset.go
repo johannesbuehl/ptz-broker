@@ -1,4 +1,4 @@
-package positionpreset
+package positionPreset
 
 import (
 	"bufio"
@@ -13,8 +13,43 @@ type Position struct {
 	Zoom string `json:"zoom"`
 }
 
-func (p Position) Recall(connection *net.TCPConn) error {
+type positionMutex struct {
+	mu       sync.Mutex
+	ch       chan error
+	Position Position
+}
+
+func (p Position) RecallCameraPosition(connection *net.TCPConn) error {
+	mu := positionMutex{
+		ch: make(chan error),
+	}
+
+	go mu.Position.recallPanTilt(connection)
+	go mu.Position.recallZoom(connection)
+
+	err1, err2 := <-mu.ch, <-mu.ch
+
+	if err1 != nil {
+		return err1
+	}
+	if err2 != nil {
+		return err2
+	}
+	return nil
+
+}
+
+func (p Position) recallPanTilt(connection *net.TCPConn) error {
 	command := "81 01 06 02 18 14 " + strings.Join([]string{p.Pan, p.Tilt}, " ") + " FF"
+
+	if _, err := connection.Write([]byte(command)); err != nil {
+		return err
+	} else {
+		return nil
+	}
+}
+func (z Position) recallZoom(connection *net.TCPConn) error {
+	command := "81 01 04 47 " + z.Zoom + " FF"
 
 	if _, err := connection.Write([]byte(command)); err != nil {
 		return err
@@ -24,7 +59,7 @@ func (p Position) Recall(connection *net.TCPConn) error {
 }
 
 func GetCameraPosition(connection *net.TCPConn) (Position, error) {
-	mu := getMutex{
+	mu := positionMutex{
 		ch: make(chan error),
 	}
 
@@ -42,13 +77,7 @@ func GetCameraPosition(connection *net.TCPConn) (Position, error) {
 	return mu.Position, nil
 }
 
-type getMutex struct {
-	mu       sync.Mutex
-	ch       chan error
-	Position Position
-}
-
-func (c *getMutex) getPanTilt(connection *net.TCPConn) {
+func (c *positionMutex) getPanTilt(connection *net.TCPConn) {
 	if _, err := connection.Write([]byte("81 09 06 12 FF\n")); err != nil {
 		c.ch <- err
 	} else {
@@ -66,7 +95,7 @@ func (c *getMutex) getPanTilt(connection *net.TCPConn) {
 	}
 }
 
-func (c *getMutex) getZoom(connection *net.TCPConn) {
+func (c *positionMutex) getZoom(connection *net.TCPConn) {
 	if _, err := connection.Write([]byte("81 09 04 47 FF\n")); err != nil {
 		c.ch <- err
 	} else {
