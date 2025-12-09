@@ -1,0 +1,13 @@
+{
+	"presets": {
+		"positions": {}
+	},
+	"camera": {
+		"adress": {
+			"ip": "192.168.4.200",
+			"port": 5678
+		},
+		"speed": "18"
+	},
+	"osc_port": 8765
+}
