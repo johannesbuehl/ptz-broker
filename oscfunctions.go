@@ -61,3 +61,35 @@ func openMenu(msg *osc.Message, connection *net.TCPConn) {
 func enter(msg *osc.Message, connection *net.TCPConn) {
 	cameraControl.Enter(connection)
 }
+
+func modeWhiteBalance(msg *osc.Message, connection *net.TCPConn) {
+	if typeString, err := msg.TypeTags(); typeString == "s" && err == nil {
+		message := msg.String()
+
+		cameraControl.ModeWhiteBalance(message, connection)
+	}
+}
+
+func manuelColorTemperature(msg *osc.Message, connection *net.TCPConn) {
+	if typeString, err := msg.TypeTags(); typeString == "s" && err == nil {
+		message := msg.String()
+
+		cameraControl.ManuelColorTemperature(message, connection)
+	}
+}
+
+func redGain(msg *osc.Message, connection *net.TCPConn) {
+	if typeString, err := msg.TypeTags(); typeString == "s" && err == nil {
+		message := msg.String()
+
+		cameraControl.RedGain(message, connection)
+	}
+}
+
+func blueGain(msg *osc.Message, connection *net.TCPConn) {
+	if typeString, err := msg.TypeTags(); typeString == "s" && err == nil {
+		message := msg.String()
+
+		cameraControl.BlueGain(message, connection)
+	}
+}

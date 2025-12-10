@@ -28,13 +28,17 @@ func main() {
 		d := osc.NewStandardDispatcher()
 
 		endpoints := map[string]func(*osc.Message, *net.TCPConn){
-			"/preset/position/recall": recallPreset,
-			"/preset/position/save":   savePreset,
-			"/control/move":           moveCamera,
-			"/control/zoom":           zoomCamera,
-			"/control/speed/set":      setSpeed,
-			"/control/menu/open":      openMenu,
-			"/control/menu/enter":     enter,
+			"/preset/position/recall":     recallPreset,
+			"/preset/position/save":       savePreset,
+			"/control/move":               moveCamera,
+			"/control/zoom":               zoomCamera,
+			"/control/speed/set":          setSpeed,
+			"/control/menu/open":          openMenu,
+			"/control/menu/enter":         enter,
+			"/picture/color/whitebalance": modeWhiteBalance,
+			"/picture/color/temperature":  manuelColorTemperature,
+			"/picture/color/redgain":      redGain,
+			"/picture/color/bluegain":     blueGain,
 		}
 
 		for endpoint, ff := range endpoints {
