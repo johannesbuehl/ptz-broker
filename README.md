@@ -19,9 +19,11 @@
 
 ## picture
 
-| Befehl                      | Werte                                                       | Wertetyp |
-| --------------------------- | ----------------------------------------------------------- | -------- |
-| /picture/color/whitebalance | "auto"; "onepush"; "indoor"; "outdoor"; "manuel"; "trigger" | string   |
-| /picture/color/temperature  | "up"; "down"                                                | string   |
-| /picture/color/redgain      | "up"; "down"                                                | string   |
-| /picture/color/bluegain     | "up"; "down"                                                | string   |
+| Befehl                            | Werte                                                       | Wertetyp |
+| --------------------------------- | ----------------------------------------------------------- | -------- |
+| /picture/color/whitebalance       | "auto"; "onepush"; "indoor"; "outdoor"; "manuel"; "trigger" | string   |
+| /picture/color/temperature/manuel | "up"; "down"                                                | string   |
+| /picture/color/redgain            | "up"; "down"                                                | string   |
+| /picture/color/bluegain           | "up"; "down"                                                | string   |
+| /picture/color/temperature/save   | -                                                           | -        |
+| /picture/color/temperature/recall | -                                                           | -        |

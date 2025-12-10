@@ -93,3 +93,15 @@ func blueGain(msg *osc.Message, connection *net.TCPConn) {
 		cameraControl.BlueGain(message, connection)
 	}
 }
+
+func saveColorTemperatur(msg *osc.Message, connection *net.TCPConn) {
+	if message, err := cameraControl.SaveColorTemperatur(connection); message == "s" && err == nil {
+		configFile.Camera.WhiteBalance = message
+		configFile.Save()
+	}
+
+}
+
+func recallColorTemperatur(msg *osc.Message, connection *net.TCPConn) {
+	cameraControl.RecallColorTemperatur(configFile.Camera.WhiteBalance, connection)
+}
