@@ -6,7 +6,6 @@ import (
 
 	"github.com/hypebeast/go-osc/osc"
 	"github.com/johannesbuehl/ptz-broker/pkg/config"
-	"github.com/johannesbuehl/ptz-broker/pkg/positionPreset"
 )
 
 var configFile config.Config
@@ -56,11 +55,11 @@ func main() {
 		server.ListenAndServe()
 
 		// Testcode Get Position from camera
-		if Position, err := positionPreset.GetCameraPosition(connection); err != nil {
-			fmt.Println(err)
-		} else {
-			configFile.Presets.Positions["Altar"] = Position
-		}
+		// if Position, err := positionPreset.GetCameraPosition(connection); err != nil {
+		// 	fmt.Println(err)
+		// } else {
+		// 	configFile.Presets.Positions["Altar"] = Position
+		// }
 
 	}
 }
