@@ -19,7 +19,7 @@ type Config struct {
 	Presets presets `json:"presets" validate:"required"`
 	Camera  struct {
 		Adress       Adress `json:"adress" validate:"required"`
-		Speed        string `json:"speed" validate:"required"`
+		Speed        byte   `json:"speed" validate:"required"`
 		WhiteBalance string `json:"whitebalance" validate:"required"`
 	} `json:"camera" validate:"required"`
 	OSCPort uint `json:"osc_port" validate:"required,port"`

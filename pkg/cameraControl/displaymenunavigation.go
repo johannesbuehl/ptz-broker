@@ -3,8 +3,9 @@ package cameraControl
 import "net"
 
 func OpenMenu(connection *net.TCPConn) error {
-	command := "81 01 04 3F 02 5F FF"
-
+	command := []byte{
+		0x81, 0x01, 0x04, 0x3F, 0x02, 0x5F, 0xFF,
+	}
 	if _, err := connection.Write([]byte(command)); err != nil {
 		return err
 	} else {
@@ -13,7 +14,9 @@ func OpenMenu(connection *net.TCPConn) error {
 }
 
 func Enter(connection *net.TCPConn) error {
-	command := "81 01 06 06 05 FF"
+	command := []byte{
+		0x81, 0x01, 0x06, 0x06, 0x05, 0xFF,
+	}
 
 	if _, err := connection.Write([]byte(command)); err != nil {
 		return err

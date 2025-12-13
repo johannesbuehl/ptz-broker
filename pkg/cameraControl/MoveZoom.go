@@ -2,26 +2,32 @@ package cameraControl
 
 import (
 	"net"
-	"strings"
 )
 
-func Move(speed, direction string, connection *net.TCPConn) error {
-	var direc string
+func Move(speed byte, direction string, connection *net.TCPConn) error {
+	direc := []byte{
+		0x81, 0x01, 0x06, 0x01, speed, speed, 0x00, 0x00, 0xFF,
+	}
+
 	switch direction {
 	case "up":
-		direc = "03 01"
+		direc[6] = 0x03
+		direc[7] = 0x01
 	case "down":
-		direc = "03 02"
+		direc[6] = 0x03
+		direc[7] = 0x02
 	case "right":
-		direc = "02 03"
+		direc[6] = 0x02
+		direc[7] = 0x03
 	case "left":
-		direc = "01 03"
+		direc[6] = 0x01
+		direc[7] = 0x03
 	case "stop":
-		direc = "03 03"
+		direc[6] = 0x03
+		direc[7] = 0x03
 	}
-	command := "81 01 06 01 " + strings.Join([]string{speed, speed, direc}, " ") + " FF"
 
-	if _, err := connection.Write([]byte(command)); err != nil {
+	if _, err := connection.Write(direc); err != nil {
 		return err
 	} else {
 		return nil
@@ -29,19 +35,19 @@ func Move(speed, direction string, connection *net.TCPConn) error {
 }
 
 func Zoom(zoomType string, connection *net.TCPConn) error {
-	var zoomCommand string
+	zoomCommand := []byte{
+		0x81, 0x01, 0x04, 0x07, 0x00, 0xFF,
+	}
 	switch zoomType {
 	case "in":
-		zoomCommand = "02"
+		zoomCommand[4] = 0x02
 	case "out":
-		zoomCommand = "03"
+		zoomCommand[4] = 0x03
 	case "stop":
-		zoomCommand = "00"
+		zoomCommand[4] = 0x00
 	}
 
-	command := "81 01 04 07 " + zoomCommand + " FF"
-
-	if _, err := connection.Write([]byte(command)); err != nil {
+	if _, err := connection.Write(zoomCommand); err != nil {
 		return err
 	} else {
 		return nil

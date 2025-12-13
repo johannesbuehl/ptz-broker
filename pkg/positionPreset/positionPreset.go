@@ -96,17 +96,18 @@ func (c *positionMutex) getPanTilt(connection *net.TCPConn) {
 }
 
 func (c *positionMutex) getZoom(connection *net.TCPConn) {
-	if _, err := connection.Write([]byte("81 09 04 47 FF\n")); err != nil {
+	if _, err := connection.Write([]byte("81 09 04 47 FF")); err != nil {
 		c.ch <- err
 	} else {
-		reader := bufio.NewReader(connection)
+		response := make([]byte, 32)
 
-		if line, err := reader.ReadString('\n'); err != nil {
+		if _, err := connection.Read(response); err != nil {
 			c.ch <- err
 		} else {
 			c.mu.Lock()
-			c.Position.Zoom = line[6:17]
+			c.Position.Zoom = string(response)[6:17]
 			c.mu.Unlock()
+
 			c.ch <- nil
 		}
 	}

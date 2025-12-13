@@ -6,23 +6,30 @@ import (
 )
 
 func ModeWhiteBalance(whiteBalanceMode string, connection *net.TCPConn) error {
-	var mode string
+	command := []byte{
+		0x81, 0x01, 0x04, 0x00, 0x00, 0xFF,
+	}
 
 	switch whiteBalanceMode {
 	case "auto":
-		mode = "35 00"
+		command[3] = 0x35
+		command[4] = 0x00
 	case "onepush":
-		mode = "35 03"
+		command[3] = 0x35
+		command[4] = 0x03
 	case "indoor":
-		mode = "35 01"
+		command[3] = 0x35
+		command[4] = 0x01
 	case "outdoor":
-		mode = "35 02"
+		command[3] = 0x35
+		command[4] = 0x02
 	case "manuel":
-		mode = "35 05"
+		command[3] = 0x35
+		command[4] = 0x05
 	case "trigger":
-		mode = "10 05"
+		command[3] = 0x10
+		command[4] = 0x05
 	}
-	command := "81 01 04 " + mode + " FF"
 
 	if _, err := connection.Write([]byte(command)); err != nil {
 		return err
@@ -32,14 +39,15 @@ func ModeWhiteBalance(whiteBalanceMode string, connection *net.TCPConn) error {
 }
 
 func ManuelColorTemperature(valueManuel string, connection *net.TCPConn) error {
-	var value string
+	command := []byte{
+		0x81, 0x01, 0x04, 0x20, 0x00, 0xFF,
+	}
 	switch valueManuel {
 	case "up":
-		value = "02"
+		command[4] = 0x02
 	case "down":
-		value = "03"
+		command[4] = 0x03
 	}
-	command := "81 01 04 20 " + value + " FF"
 
 	if _, err := connection.Write([]byte(command)); err != nil {
 		return err
@@ -49,14 +57,15 @@ func ManuelColorTemperature(valueManuel string, connection *net.TCPConn) error {
 }
 
 func RedGain(valueManuel string, connection *net.TCPConn) error {
-	var value string
+	command := []byte{
+		0x81, 0x01, 0x04, 0x03, 0x00, 0xFF,
+	}
 	switch valueManuel {
 	case "up":
-		value = "02"
+		command[4] = 0x02
 	case "down":
-		value = "03"
+		command[4] = 0x03
 	}
-	command := "81 01 04 03 " + value + " FF"
 
 	if _, err := connection.Write([]byte(command)); err != nil {
 		return err
@@ -66,14 +75,15 @@ func RedGain(valueManuel string, connection *net.TCPConn) error {
 }
 
 func BlueGain(valueManuel string, connection *net.TCPConn) error {
-	var value string
+	command := []byte{
+		0x81, 0x01, 0x04, 0x04, 0x00, 0xFF,
+	}
 	switch valueManuel {
 	case "up":
-		value = "02"
+		command[4] = 0x02
 	case "down":
-		value = "03"
+		command[4] = 0x03
 	}
-	command := "81 01 04 04 " + value + " FF"
 
 	if _, err := connection.Write([]byte(command)); err != nil {
 		return err
@@ -82,24 +92,27 @@ func BlueGain(valueManuel string, connection *net.TCPConn) error {
 	}
 }
 
-func SaveColorTemperatur(connection *net.TCPConn) (string, error) {
-	command := "81 09 04 20 FF"
-
+func SaveColorTemperatur(connection *net.TCPConn) (int, error) {
+	command := []byte{
+		0x81, 0x09, 0x04, 0x20, 0xFF,
+	}
 	if _, err := connection.Write([]byte(command)); err != nil {
-		return "", err
+		return 0, err
 	} else {
 		reader := bufio.NewReader(connection)
-		if line, err := reader.ReadString('\n'); err != nil {
-			return "", err
+		if _, err := reader.ReadString('\n'); err != nil {
+			return 0, err
 		} else {
-			whiteBalance := line[6:8]
-			return whiteBalance, nil
+			// whiteBalance := (line[6:8])
+			return 0, nil
 		}
 	}
 }
 
-func RecallColorTemperatur(whiteBalance string, connection *net.TCPConn) error {
-	command := "81 01 04 20 " + whiteBalance + " FF"
+func RecallColorTemperatur(whiteBalance byte, connection *net.TCPConn) error {
+	command := []byte{
+		0x81, 0x01, 0x04, 0x20, whiteBalance, 0xFF,
+	}
 
 	if _, err := connection.Write([]byte(command)); err != nil {
 		return err
