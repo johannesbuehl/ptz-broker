@@ -38,8 +38,8 @@ func main() {
 			"/picture/color/temperature/manuel": manuelColorTemperature,
 			"/picture/color/redgain":            redGain,
 			"/picture/color/bluegain":           blueGain,
-			"/picture/color/temperature/save":   saveColorTemperatur,
-			"/picture/color/temperature/recall": recallColorTemperatur,
+			// "/picture/color/temperature/save":   saveColorTemperatur,
+			// "/picture/color/temperature/recall": recallColorTemperatur,
 		}
 
 		for endpoint, ff := range endpoints {
