@@ -1,14 +1,35 @@
 {
 	"presets": {
-		"positions": {}
+		"positions": {
+			"Altar": {
+				"pan": [
+					0,
+					1,
+					13,
+					1
+				],
+				"tilt": [
+					15,
+					14,
+					11,
+					6
+				],
+				"zoom": [
+					0,
+					11,
+					0,
+					2
+				]
+			}
+		}
 	},
 	"camera": {
 		"adress": {
 			"ip": "192.168.4.200",
 			"port": 5678
 		},
-		"speed": "14",
-		"whitebalance": " "
+		"speed": 14,
+		"whitebalance": "AAA="
 	},
 	"osc_port": 8765
 }
