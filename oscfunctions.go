@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/hypebeast/go-osc/osc"
-	"github.com/johannesbuehl/ptz-broker/pkg/cameraControl"
 	"github.com/johannesbuehl/ptz-broker/pkg/config"
 	"github.com/johannesbuehl/ptz-broker/pkg/visca"
 )
@@ -29,17 +28,17 @@ func getInteger(msg *osc.Message) (int32, error) {
 	}
 }
 
-func recallPreset(msg *osc.Message, camera *visca.Camera) {
+func recallPositionPreset(msg *osc.Message, camera *visca.Camera) {
 	if message, err := getString(msg); err == nil {
 		if position, check := configFile.Presets.Positions[message]; check {
 			if camera.PanTiltAbsolute(position.PanTilt) == nil {
-				camera.Zoom(position.Zoom)
+				camera.ZoomAbsolute(position.Zoom)
 			}
 		}
 	}
 }
 
-func savePreset(msg *osc.Message, camera *visca.Camera) {
+func savePositionPreset(msg *osc.Message, camera *visca.Camera) {
 	if message, err := getString(msg); err == nil {
 		if panTilt, err := camera.GetPanTilt(); err == nil {
 			if zoom, err := camera.GetZoom(); err == nil {
@@ -74,45 +73,91 @@ func setSpeed(msg *osc.Message, camera *visca.Camera) {
 }
 
 func openMenu(msg *osc.Message, camera *visca.Camera) {
-	cameraControl.OpenMenu(connection)
+	camera.OpenMenu()
 }
 
 func enter(msg *osc.Message, camera *visca.Camera) {
-	cameraControl.Enter(connection)
+	camera.Enter()
 }
 
-func modeWhiteBalance(msg *osc.Message, camera *visca.Camera) {
+func autoWhiteBalance(msg *osc.Message, camera *visca.Camera) {
+	camera.ModeWhiteBalance(visca.WBAuto)
+}
+
+func onePushWhiteBalance(msg *osc.Message, camera *visca.Camera) {
+	camera.ModeWhiteBalance(visca.WBOnePush)
+}
+
+func indoorWhiteBalance(msg *osc.Message, camera *visca.Camera) {
+	camera.ModeWhiteBalance(visca.WBIndoor)
+}
+
+func outdoorWhiteBalance(msg *osc.Message, camera *visca.Camera) {
+	camera.ModeWhiteBalance(visca.WBOutdoor)
+}
+
+func manuelWhiteBalance(msg *osc.Message, camera *visca.Camera) {
+	camera.ModeWhiteBalance(visca.WBManuel)
+}
+
+func triggerWhiteBalance(msg *osc.Message, camera *visca.Camera) {
+	camera.ModeWhiteBalance(visca.WBTrigger)
+}
+
+func decreaseColorTemperature(msg *osc.Message, camera *visca.Camera) {
+	camera.DecreaseColorTemperature()
+}
+
+func increaseColorTemperature(msg *osc.Message, camera *visca.Camera) {
+	camera.IncreaseColorTemperature()
+}
+
+func decreaseRedGain(msg *osc.Message, camera *visca.Camera) {
+	camera.DecreaseRedGain()
+}
+
+func increaseRedGain(msg *osc.Message, camera *visca.Camera) {
+	camera.IncreaseRedGain()
+}
+
+func decreaseBlueGain(msg *osc.Message, camera *visca.Camera) {
+	camera.DecreaseBlueGain()
+}
+
+func increaseBlueGain(msg *osc.Message, camera *visca.Camera) {
+	camera.IncreaseBlueGain()
+}
+
+func recallColorPreset(msg *osc.Message, camera *visca.Camera) {
 	if message, err := getString(msg); err == nil {
-		cameraControl.ModeWhiteBalance(message, connection)
+		if color, check := configFile.Presets.Color[message]; check {
+			if camera.SetColorTemperature(color.ColorTemperature) == nil {
+				if camera.SetRedGain(color.RedGain) == nil {
+					if camera.SetBlueGain(color.BlueGain) == nil {
+						camera.SetHue(color.Hue)
+					}
+				}
+			}
+		}
 	}
 }
 
-func manuelColorTemperature(msg *osc.Message, camera *visca.Camera) {
+func saveColorPreset(msg *osc.Message, camera *visca.Camera) {
 	if message, err := getString(msg); err == nil {
-		cameraControl.ManuelColorTemperature(message, connection)
+		if colorTemperature, err := camera.GetColorTemperature(); err == nil {
+			if redGain, err := camera.GetRedGain(); err == nil {
+				if blueGain, err := camera.GetBlueGain(); err == nil {
+					if hue, err := camera.GetHue(); err == nil {
+						configFile.Presets.Color[message] = config.Color{
+							ColorTemperature: colorTemperature,
+							RedGain:          redGain,
+							BlueGain:         blueGain,
+							Hue:              hue,
+						}
+						configFile.Save()
+					}
+				}
+			}
+		}
 	}
 }
-
-func redGain(msg *osc.Message, camera *visca.Camera) {
-	if message, err := getString(msg); err == nil {
-		cameraControl.RedGain(message, connection)
-	}
-}
-
-func blueGain(msg *osc.Message, camera *visca.Camera) {
-	if message, err := getString(msg); err == nil {
-		cameraControl.BlueGain(message, connection)
-	}
-}
-
-// func saveColorTemperatur(msg *osc.Message, camera *visca.Camera) {
-// 	if message, err := cameraControl.SaveColorTemperatur(connection); err == nil {
-// 		configFile.Camera.WhiteBalance = bytes(message)
-// 		configFile.Save()
-// 	}
-
-// }
-
-// func recallColorTemperatur(msg *osc.Message, camera *visca.Camera) {
-// 	cameraControl.RecallColorTemperatur(configFile.Camera.WhiteBalance, connection)
-// }

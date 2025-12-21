@@ -11,8 +11,16 @@ type Position struct {
 	Zoom    visca.Zoom    `json:"zoom" validate:"required"`
 }
 
+type Color struct {
+	ColorTemperature visca.ColorTemperature
+	RedGain          visca.RedGain
+	BlueGain         visca.BlueGain
+	Hue              visca.Hue
+}
+
 type Presets struct {
 	Positions map[string]Position `json:"positions" validate:"required"`
+	Color     map[string]Color    `json:"color" validate:"required"`
 }
 
 type Adress struct {
@@ -23,9 +31,8 @@ type Adress struct {
 type Config struct {
 	Presets Presets `json:"presets" validate:"required"`
 	Camera  struct {
-		Adress       Adress      `json:"adress" validate:"required"`
-		Speed        visca.Speed `json:"speed" validate:"required"`
-		WhiteBalance []byte      `json:"whitebalance" validate:"required"`
+		Adress Adress      `json:"adress" validate:"required"`
+		Speed  visca.Speed `json:"speed" validate:"required"`
 	} `json:"camera" validate:"required"`
 	OSCPort uint `json:"osc_port" validate:"required,port"`
 

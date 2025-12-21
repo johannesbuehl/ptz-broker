@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/johannesbuehl/ptz-broker/pkg/positionPreset"
 )
 
 func Load(pth string) (Config, error) {
@@ -15,7 +14,7 @@ func Load(pth string) (Config, error) {
 
 	if cont, err := os.ReadFile(pth); err != nil {
 		if os.IsNotExist(err) {
-			conf.Presets.Positions = map[string]positionPreset.Position{}
+			conf.Presets.Positions = map[string]Position{}
 			if err := conf.Save(); err != nil {
 				return conf, err
 			} else {

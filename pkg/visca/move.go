@@ -35,7 +35,7 @@ func (c *Camera) Move(direction Direction, speed Speed) error {
 		command[7] = 0x03
 	}
 
-	if _, err := c.sendCommand(command); err != nil {
+	if err := c.sendCommand(command); err != nil {
 		return err
 	} else {
 		return nil

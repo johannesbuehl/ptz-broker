@@ -6,6 +6,8 @@
 | ----------------------- | ---------------- | -------- |
 | /preset/position/recall | Name des presets | string   |
 | /preset/position/save   | Name des presets | string   |
+| /preset/color/recall    | Name des presets | string   |
+| /preset/color/save      | Name des presets | string   |
 
 ## control
 
@@ -19,11 +21,12 @@
 
 ## picture
 
-| Befehl                            | Werte                                                       | Wertetyp |
-| --------------------------------- | ----------------------------------------------------------- | -------- |
-| /picture/color/whitebalance       | "auto"; "onepush"; "indoor"; "outdoor"; "manuel"; "trigger" | string   |
-| /picture/color/temperature/manuel | "up"; "down"                                                | string   |
-| /picture/color/redgain            | "up"; "down"                                                | string   |
-| /picture/color/bluegain           | "up"; "down"                                                | string   |
-| /picture/color/temperature/save   | -                                                           | -        |
-| /picture/color/temperature/recall | -                                                           | -        |
+| Befehl                                 | Werte                                                       | Wertetyp |
+| -------------------------------------- | ----------------------------------------------------------- | -------- |
+| /picture/color/whitebalance            | "auto"; "onepush"; "indoor"; "outdoor"; "manuel"; "trigger" | string   |
+| /picture/color/temperature/manuel/up   | -                                                           | -        |
+| /picture/color/temperature/manuel/down | -                                                           | -        |
+| /picture/color/redgain/up              | -                                                           | -        |
+| /picture/color/redgain/down            | -                                                           | -        |
+| /picture/color/bluegain/up             | -                                                           | -        |
+| /picture/color/bluegain/down           | -                                                           | -        |

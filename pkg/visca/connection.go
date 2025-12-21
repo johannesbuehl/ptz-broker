@@ -123,7 +123,7 @@ func getResponse(ch chan []byte) ([]byte, error) {
 }
 
 // send a command to the camera and get a response
-func (c *Camera) sendCommand(b []byte) (chan []byte, error) {
+func (c *Camera) _sendCommand(b []byte) (chan []byte, error) {
 	c.mu.Lock()
 
 	if _, err := c.connection.Write(b); err != nil {
@@ -155,5 +155,35 @@ func (c *Camera) sendCommand(b []byte) (chan []byte, error) {
 
 			return responseChannel, nil
 		}
+	}
+}
+
+func (c *Camera) sendCommand(command []byte) error {
+	if ch, err := c._sendCommand(command); err != nil {
+		return err
+	} else {
+		// wait for message
+		if msg, err := getResponse(ch); err != nil {
+			return err
+		} else {
+			// if the message is an acknowledge, wait for the completion
+			if resp, _ := parseViscaResponse(msg); resp == ResponseAcknowledge {
+				if _, err := getResponse(ch); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		}
+	}
+}
+
+func (c *Camera) sendInquiry(command []byte) ([]byte, error) {
+	if ch, err := c._sendCommand(command); err != nil {
+		return nil, err
+	} else if response, err := getResponse(ch); err != nil {
+		return nil, err
+	} else {
+		return response, nil
 	}
 }
