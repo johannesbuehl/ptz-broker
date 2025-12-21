@@ -1,3 +1,4 @@
+// Package visca implements communication with visca-cameras over ip
 package visca
 
 import (
@@ -18,6 +19,7 @@ type Camera struct {
 	defaultChannel chan []byte
 }
 
+// Connect to the camera
 func (c *Camera) Connect() error {
 	if tcpAddress, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", c.IP, c.Port)); err != nil {
 		return err
@@ -29,18 +31,18 @@ func (c *Camera) Connect() error {
 		// initialize sockets
 		c.defaultChannel = make(chan []byte)
 		c.channels = make(map[viscaSocket]chan []byte)
-
 		for socket := range viscaSocket(8) {
 			c.channels[socket] = make(chan []byte)
 		}
 
+		// response reader
 		go func() {
 			reader := bufio.NewReader(c.connection)
 
 			for {
 				if content, err := reader.ReadBytes(0xFF); err == nil {
 					// check for a resonse with a socket (that is not an ACK)
-					if response, socket := parseViscaResponse(content); response == RESP_COMPLETION || response == RESP_COMMAND_CANCELLED || response == RESP_NO_SOCKET || response == RESP_COMMAND_NOT_EXECUTABLE {
+					if response, socket := parseViscaResponse(content); response == ResponseCompletion || response == ResponseCommandCancelled || response == ResponseNoSocket || response == ResponseCommandNotExecutable {
 						c.channels[socket] <- content
 					} else {
 						c.defaultChannel <- content
@@ -53,11 +55,12 @@ func (c *Camera) Connect() error {
 	}
 }
 
+// Disconnect from the camera
 func (c *Camera) Disconnect() error {
 	return c.connection.Close()
 }
 
-const BUFFER_LEN = 32
+const BufferLength = 32
 
 type (
 	viscaResponse uint8
@@ -65,58 +68,62 @@ type (
 )
 
 const (
-	RESP_ACK viscaResponse = iota
-	RESP_COMPLETION
-	RESP_SYNTAX_ERROR
-	RESP_COMMAND_BUFFER_FULL
-	RESP_COMMAND_CANCELLED
-	RESP_NO_SOCKET
-	RESP_COMMAND_NOT_EXECUTABLE
-	RESP_INQUIRY
+	ResponseAcknowledge viscaResponse = iota
+	ResponseCompletion
+	ResponseSyntaxError
+	ResponseCommandBufferFull
+	ResponseCommandCancelled
+	ResponseNoSocket
+	ResponseCommandNotExecutable
+	ResponseInquiry
 )
 
+// parse a visca response
 func parseViscaResponse(msg []byte) (viscaResponse, viscaSocket) {
 	var response viscaResponse
 	socket := viscaSocket(msg[1] % 16)
 
 	switch msg[1] >> 4 {
 	case 4:
-		response = RESP_ACK
+		response = ResponseAcknowledge
 	case 5:
 		if len(msg) == 3 {
-			response = RESP_COMPLETION
+			response = ResponseCompletion
 		} else {
-			response = RESP_INQUIRY
+			socket = math.MaxUint8
+			response = ResponseInquiry
 		}
 	case 6:
 		switch msg[2] {
 		case 2:
 			socket = math.MaxUint8
-			response = RESP_SYNTAX_ERROR
+			response = ResponseSyntaxError
 		case 3:
 			socket = math.MaxUint8
-			response = RESP_COMMAND_BUFFER_FULL
+			response = ResponseCommandBufferFull
 		case 4:
-			response = RESP_COMMAND_CANCELLED
+			response = ResponseCommandCancelled
 		case 5:
-			response = RESP_NO_SOCKET
+			response = ResponseNoSocket
 		case 0x41:
-			response = RESP_COMMAND_NOT_EXECUTABLE
+			response = ResponseCommandNotExecutable
 		}
 	}
 
 	return response, socket
 }
 
+// wait for a response from the channel and return it, time out after 1 second
 func getResponse(ch chan []byte) ([]byte, error) {
 	select {
 	case response := <-ch:
 		return response, nil
-	case <-time.After(10 * time.Second):
+	case <-time.After(1 * time.Second):
 		return nil, fmt.Errorf("timed out waiting for channel message")
 	}
 }
 
+// send a command to the camera and get a response
 func (c *Camera) sendCommand(b []byte) (chan []byte, error) {
 	c.mu.Lock()
 
@@ -129,15 +136,15 @@ func (c *Camera) sendCommand(b []byte) (chan []byte, error) {
 
 		if err != nil {
 			return nil, err
-
-			// if it was an acknowledge, wait for the completion message
 		} else {
 			responseChannel := make(chan []byte)
 
+			// wait for the responses in the background and send them back through the channel
 			go func() {
 				defer close(responseChannel)
 
-				if resp, socket := parseViscaResponse(response); resp == RESP_ACK {
+				// if it was an acknowledge, wait for the completion message
+				if resp, socket := parseViscaResponse(response); resp == ResponseAcknowledge {
 					if response, err := getResponse(c.channels[socket]); err != nil {
 					} else {
 						responseChannel <- response

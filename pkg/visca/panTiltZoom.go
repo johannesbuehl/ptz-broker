@@ -1,10 +1,11 @@
 package visca
 
 type PanTilt struct {
-	Pan  [4]byte
-	Tilt [4]byte
+	Pan  [4]byte `json:"pan"`
+	Tilt [4]byte `json:"tilt"`
 }
 
+// PanTiltAbsolute sends absolute pan and tilt positions to the camera
 func (c *Camera) PanTiltAbsolute(pt PanTilt) error {
 	command := []byte{
 		0x81, 0x01, 0x06, 0x02, 0x18, 0x14, pt.Pan[0], pt.Pan[1], pt.Pan[2], pt.Pan[3], pt.Tilt[0], pt.Tilt[1], pt.Tilt[2], pt.Tilt[3], 0xFF,
@@ -18,7 +19,7 @@ func (c *Camera) PanTiltAbsolute(pt PanTilt) error {
 			return err
 		} else {
 			// if the message is an acknowledge, wait for the completion
-			if resp, _ := parseViscaResponse(msg); resp == RESP_ACK {
+			if resp, _ := parseViscaResponse(msg); resp == ResponseAcknowledge {
 				if _, err := getResponse(ch); err != nil {
 					return err
 				}
@@ -29,6 +30,7 @@ func (c *Camera) PanTiltAbsolute(pt PanTilt) error {
 	}
 }
 
+// GetPanTilt position from the camera
 func (c *Camera) GetPanTilt() (PanTilt, error) {
 	if ch, err := c.sendCommand([]byte{0x81, 0x09, 0x06, 0x12, 0xFF}); err != nil {
 		return PanTilt{}, err
@@ -54,6 +56,7 @@ func (c *Camera) GetPanTilt() (PanTilt, error) {
 
 type Zoom [4]byte
 
+// Zoom the camera
 func (c *Camera) Zoom(zoom Zoom) error {
 	command := []byte{
 		0x81, 0x01, 0x04, 0x47, zoom[0], zoom[1], zoom[2], zoom[3], 0xFF,
@@ -67,7 +70,7 @@ func (c *Camera) Zoom(zoom Zoom) error {
 			return err
 		} else {
 			// if the message is an acknowledge, wait for the completion
-			if resp, _ := parseViscaResponse(msg); resp == RESP_ACK {
+			if resp, _ := parseViscaResponse(msg); resp == ResponseAcknowledge {
 				if _, err := getResponse(ch); err != nil {
 					return err
 				}
@@ -78,6 +81,7 @@ func (c *Camera) Zoom(zoom Zoom) error {
 	}
 }
 
+// GetZoom of the camera
 func (c *Camera) GetZoom() (Zoom, error) {
 	if ch, err := c.sendCommand([]byte{0x81, 0x09, 0x06, 0x12, 0xFF}); err != nil {
 		return Zoom{}, err
