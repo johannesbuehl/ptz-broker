@@ -15,8 +15,8 @@ type Camera struct {
 	Port           uint16
 	connection     *net.TCPConn
 	mu             sync.Mutex
-	channels       map[viscaSocket]chan []byte
 	defaultChannel chan []byte
+	socketChannels map[viscaSocket]chan []byte
 }
 
 // Connect to the camera
@@ -30,9 +30,9 @@ func (c *Camera) Connect() error {
 	} else {
 		// initialize sockets
 		c.defaultChannel = make(chan []byte)
-		c.channels = make(map[viscaSocket]chan []byte)
+		c.socketChannels = make(map[viscaSocket]chan []byte)
 		for socket := range viscaSocket(8) {
-			c.channels[socket] = make(chan []byte)
+			c.socketChannels[socket] = make(chan []byte)
 		}
 
 		// response reader
@@ -43,7 +43,7 @@ func (c *Camera) Connect() error {
 				if content, err := reader.ReadBytes(0xFF); err == nil {
 					// check for a resonse with a socket (that is not an ACK)
 					if response, socket := parseViscaResponse(content); response == ResponseCompletion || response == ResponseCommandCancelled || response == ResponseNoSocket || response == ResponseCommandNotExecutable {
-						c.channels[socket] <- content
+						c.socketChannels[socket] <- content
 					} else {
 						c.defaultChannel <- content
 					}
@@ -57,10 +57,9 @@ func (c *Camera) Connect() error {
 
 // Disconnect from the camera
 func (c *Camera) Disconnect() error {
+	// TODO: stop receive-goroutine
 	return c.connection.Close()
 }
-
-const BufferLength = 32
 
 type (
 	viscaResponse uint8
@@ -145,7 +144,7 @@ func (c *Camera) sendCommand(b []byte) (chan []byte, error) {
 
 				// if it was an acknowledge, wait for the completion message
 				if resp, socket := parseViscaResponse(response); resp == ResponseAcknowledge {
-					if response, err := getResponse(c.channels[socket]); err != nil {
+					if response, err := getResponse(c.socketChannels[socket]); err != nil {
 					} else {
 						responseChannel <- response
 					}
